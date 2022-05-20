@@ -22,9 +22,9 @@ from .tools.manifest import get_translatable_addons
 logger = get_logger()
 
 
-def get_project_name(repository, branch, addons_subdirectory):
-    repo_name = repository.split('/')[-1].replace('.git', '') + addons_subdirectory.split('_')[-1]
-    return '%s-%s' % (repo_name, branch)
+def get_project_name(repository, addons_subdirectory):
+    repo_name = repository.split('/')[-1].replace('.git', '') + '-' + addons_subdirectory.split('_')[-1]
+    return '%s' % (repo_name)
 
 
 def get_project_slug(project_name):
@@ -43,7 +43,7 @@ def project_exists(project_name):
 def create_project(
         repository, branch, tmpl_component_slug,
         addons_subdirectory=None, use_ssh=False):
-    project_name = get_project_name(repository, branch, addons_subdirectory)
+    project_name = get_project_name(repository, addons_subdirectory)
 
     logger.info("Project name is %s", project_name)
 
@@ -164,8 +164,17 @@ def main(
     provided component template. Subsequent components can be created
     with wocg-create-components.
     """
-    create_project(
-        repository, branch, tmpl_component_slug,
-        addons_subdirectory=addons_subdirectory,
-        use_ssh=use_ssh,
-    )
+    if addons_subdirectory:
+        addons_subdirectory = addons_subdirectory.split(',')
+        for addons_dir in addons_subdirectory:
+            create_project(
+                repository, branch, tmpl_component_slug,
+                addons_subdirectory=addons_dir,
+                use_ssh=use_ssh,
+            )
+    else:
+        create_project(
+            repository, branch, tmpl_component_slug,
+            addons_subdirectory=None,
+            use_ssh=use_ssh,
+        )
