@@ -29,21 +29,22 @@ def get_translatable_addons(repository_dir, addons_subdirectory=None):
     where manifest is a dictionary.
     """
     res = {}
-    addons_dir = os.path.join(repository_dir, addons_subdirectory or '')
-    for addon_name in os.listdir(addons_dir):
-        addon_dir = os.path.join(addons_dir, addon_name)
-        manifest_path = get_manifest_path(addon_dir)
-        if not manifest_path:
-            continue
-        with open(manifest_path) as f:
-            manifest = parse_manifest(f.read())
-        if not manifest.get('installable', True):
-            continue
-        i18n_dir = os.path.join(addon_dir, 'i18n')
-        if not os.path.isdir(i18n_dir):
-            continue
-        pot_filepath = os.path.join(i18n_dir, addon_name + '.pot')
-        if not os.path.isfile(pot_filepath):
-            continue
-        res[addon_name] = (addon_dir, manifest)
+    for addons_subdir in addons_subdirectory.split(','):
+        addons_dir = os.path.join(repository_dir, addons_subdir or '')
+        for addon_name in os.listdir(addons_dir):
+            addon_dir = os.path.join(addons_dir, addon_name)
+            manifest_path = get_manifest_path(addon_dir)
+            if not manifest_path:
+                continue
+            with open(manifest_path) as f:
+                manifest = parse_manifest(f.read())
+            if not manifest.get('installable', True):
+                continue
+            i18n_dir = os.path.join(addon_dir, 'i18n')
+            if not os.path.isdir(i18n_dir):
+                continue
+            pot_filepath = os.path.join(i18n_dir, addon_name + '.pot')
+            if not os.path.isfile(pot_filepath):
+                continue
+            res[addon_name] = (addon_dir, manifest)
     return res
