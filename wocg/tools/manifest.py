@@ -29,6 +29,7 @@ def get_translatable_addons(repository_dir, addons_subdirectory=None):
     where manifest is a dictionary.
     """
     res = {}
+    addons_subdirectory = addons_subdirectory or ''
     for addons_subdir in addons_subdirectory.split(','):
         addons_dir = os.path.join(repository_dir, addons_subdir or '')
         for addon_name in os.listdir(addons_dir):
