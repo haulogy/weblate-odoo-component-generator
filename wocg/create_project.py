@@ -23,7 +23,7 @@ logger = get_logger()
 
 
 def get_project_name(repository, branch, addons_subdirectory):
-    repo_name = repository.split('/')[-1].replace('.git', '') + addons_subdirectory.split('_')[1]
+    repo_name = repository.split('/')[-1].replace('.git', '') + addons_subdirectory.split('_')[-1]
     return '%s-%s' % (repo_name, branch)
 
 
