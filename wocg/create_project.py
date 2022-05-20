@@ -83,7 +83,7 @@ def create_project(
         logger.info("Project %s already exists.", project_name)
         return
     with temp_git_clone(repository, branch, use_ssh=use_ssh) as repo_dir:
-        for addons_dir in addons_subdirectory:
+        for addons_dir in addons_subdirectory.split(','):
             get_translatable_addons_and_new_component(
                 repo_dir,
                 repository,
