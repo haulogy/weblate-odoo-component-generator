@@ -52,30 +52,31 @@ def create_project(
         return
 
     with temp_git_clone(repository, branch, use_ssh=use_ssh) as repo_dir:
-        addons = get_translatable_addons(
-            repo_dir, addons_subdirectory=addons_subdirectory)
+        for addon_subdir in addons_subdirectory.split(','):
+            addons = get_translatable_addons(
+                repo_dir, addons_subdirectory=addon_subdir)
 
-        if not addons:
-            logger.info("No addons found in %s %s", repository, branch)
-            return
+            if not addons:
+                logger.info("No addons found in %s %s", repository, branch)
+                return
 
-        logger.info("Going to create Project %s.", project_name)
-        addon_name = next(iter(addons.keys()))
-        new_project = get_new_project(
-            project_name,
-            repository,
-            tmpl_component_slug,
-        )
-
-        try:
-            get_new_component(
-                new_project, repository, branch, addon_name,
+            logger.info("Going to create Project %s.", project_name)
+            addon_name = next(iter(addons.keys()))
+            new_project = get_new_project(
+                project_name,
+                repository,
                 tmpl_component_slug,
-                addons_subdirectory=addons_subdirectory,
             )
-        except Exception as e:
-            logger.exception(e)
-            new_project.delete()
+
+            try:
+                get_new_component(
+                    new_project, repository, branch, addon_name,
+                    tmpl_component_slug,
+                    addons_subdirectory=addon_subdir,
+                )
+            except Exception as e:
+                logger.exception(e)
+                new_project.delete()
 
 
 def get_new_project(project_name, repository, tmpl_component_slug):
