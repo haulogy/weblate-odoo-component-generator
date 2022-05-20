@@ -22,8 +22,8 @@ from .tools.manifest import get_translatable_addons
 logger = get_logger()
 
 
-def get_project_name(repository, branch):
-    repo_name = repository.split('/')[-1].replace('.git', '')
+def get_project_name(repository, branch, addons_subdirectory):
+    repo_name = repository.split('/')[-1].replace('.git', '') + addons_subdirectory
     return '%s-%s' % (repo_name, branch)
 
 
@@ -43,7 +43,7 @@ def project_exists(project_name):
 def create_project(
         repository, branch, tmpl_component_slug,
         addons_subdirectory=None, use_ssh=False):
-    project_name = get_project_name(repository, branch)
+    project_name = get_project_name(repository, branch, addons_subdirectory)
 
     logger.info("Project name is %s", project_name)
 
@@ -52,31 +52,30 @@ def create_project(
         return
 
     with temp_git_clone(repository, branch, use_ssh=use_ssh) as repo_dir:
-        for addon_subdir in addons_subdirectory.split(','):
-            addons = get_translatable_addons(
-                repo_dir, addons_subdirectory=addon_subdir)
+        addons = get_translatable_addons(
+            repo_dir, addons_subdirectory=addons_subdirectory)
 
-            if not addons:
-                logger.info("No addons found in %s %s", repository, branch)
-                return
+        if not addons:
+            logger.info("No addons found in %s %s", repository, branch)
+            return
 
-            logger.info("Going to create Project %s.", project_name)
-            addon_name = next(iter(addons.keys()))
-            new_project = get_new_project(
-                project_name,
-                repository,
+        logger.info("Going to create Project %s.", project_name)
+        addon_name = next(iter(addons.keys()))
+        new_project = get_new_project(
+            project_name,
+            repository,
+            tmpl_component_slug,
+        )
+
+        try:
+            get_new_component(
+                new_project, repository, branch, addon_name,
                 tmpl_component_slug,
+                addons_subdirectory=addons_subdirectory,
             )
-
-            try:
-                get_new_component(
-                    new_project, repository, branch, addon_name,
-                    tmpl_component_slug,
-                    addons_subdirectory=addon_subdir,
-                )
-            except Exception as e:
-                logger.exception(e)
-                new_project.delete()
+        except Exception as e:
+            logger.exception(e)
+            new_project.delete()
 
 
 def get_new_project(project_name, repository, tmpl_component_slug):
